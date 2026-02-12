@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathCilik 🚀</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-blue-50 font-sans text-gray-800">
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [page, setPage] = useState('login');
+            const [user, setUser] = useState('');
+
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+                    {page === 'login' && (
+                        <div className="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-sm border-t-8 border-yellow-400">
+                            <h1 className="text-6xl mb-4">🎮</h1>
+                            <h2 className="text-3xl font-black text-blue-600 mb-6">MathCilik</h2>
+                            <p className="mb-6 text-gray-500 font-bold">Ayo Belajar Sambil Main!</p>
+                            <input 
+                                type="text" 
+                                placeholder="Tulis namamu..." 
+                                className="w-full p-4 text-xl border-4 border-blue-100 rounded-2xl mb-4 focus:border-blue-400 outline-none"
+                                onChange={(e) => setUser(e.target.value)}
+                            />
+                            <button 
+                                onClick={() => setPage('quiz')}
+                                className="w-full bg-green-500 hover:bg-green-600 text-white text-2xl font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all"
+                            >
+                                GAS MAIN! 🚀
+                            </button>
+                        </div>
+                    )}
+
+                    {page === 'quiz' && (
+                        <div className="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border-t-8 border-purple-400">
+                            <div className="flex justify-between mb-8 text-lg font-bold text-gray-400">
+                                <span>Soal 1/10</span>
+                                <span>Skor: 0</span>
+                            </div>
+                            <h2 className="text-6xl font-black text-blue-600 mb-10">7 + 5 = ?</h2>
+                            <div className="grid grid-cols-2 gap-4">
+                                {[10, 12, 11, 13].map(num => (
+                                    <button 
+                                        key={num}
+                                        onClick={() => alert(num === 12 ? 'HEBAT! Benar! 🎉' : 'Coba hitung lagi ya.. 😅')}
+                                        className="bg-blue-100 hover:bg-blue-500 hover:text-white text-3xl font-bold py-8 rounded-3xl transition-all active:scale-90"
+                                    >
+                                        {num}
+                                    </button>
+                                ))}
+                            </div>
+                            <button onClick={() => setPage('login')} className="mt-8 text-gray-400 underline font-bold">Berhenti</button>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+  </html>
+  
