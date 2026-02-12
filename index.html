@@ -5,45 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MathCilik 🚀</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
         body { font-family: 'Fredoka One', cursive; }
     </style>
 </head>
 <body class="bg-gradient-to-b from-blue-400 to-purple-500 min-h-screen flex items-center justify-center p-4 text-white text-center">
-    <div class="bg-white rounded-[50px] p-10 shadow-2xl text-gray-800 max-w-sm w-full border-b-[15px] border-gray-200">
-        <h1 class="text-5xl mb-4">🚀</h1>
-        <h2 class="text-4xl font-bold text-blue-600 mb-2">MathCilik</h2>
-        <p class="text-gray-500 text-lg mb-8">Siap jadi jagoan matematika?</p>
-        
-        <div id="game-area">
-            <input id="nama" type="text" placeholder="Tulis namamu..." class="w-full p-5 text-2xl border-4 border-blue-100 rounded-3xl mb-6 focus:border-yellow-400 outline-none transition-all text-center">
-            <button onclick="mulai()" class="w-full bg-orange-500 hover:bg-orange-600 text-white text-3xl font-bold py-5 rounded-3xl shadow-[0_10px_0_rgb(194,120,0)] active:shadow-none active:translate-y-2 transition-all">
-                MAIN! 🎮
+    <div class="bg-white rounded-[50px] p-8 shadow-2xl text-gray-800 max-w-sm w-full border-b-[15px] border-gray-200">
+        <div id="game-container">
+            <h1 class="text-5xl mb-4">🎮</h1>
+            <h2 class="text-3xl font-bold text-blue-600 mb-6">MathCilik</h2>
+            <input id="nama" type="text" placeholder="Nama kamu..." class="w-full p-4 text-xl border-4 border-blue-100 rounded-3xl mb-6 text-center outline-none focus:border-yellow-400">
+            <button onclick="mulaiGame()" class="w-full bg-orange-500 text-white text-2xl font-bold py-4 rounded-3xl shadow-[0_8px_0_rgb(194,120,0)] active:shadow-none active:translate-y-2 transition-all">
+                GASPOL! 🚀
             </button>
         </div>
     </div>
 
     <script>
-        function mulai() {
+        let skor = 0;
+        let soalSekarang = {};
+        
+        // --- DAFTAR SUARA ---
+        const sfxCring = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'); // Benar
+        const sfxTetot = new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3'); // Salah
+        const sfxTimer = new Audio('https://assets.mixkit.co/active_storage/sfx/2030/2030-preview.mp3'); // Detik jam
+        sfxTimer.loop = true;
+
+        function mulaiGame() {
             const nama = document.getElementById('nama').value;
-            if(!nama) return alert('Tulis namamu dulu dong sayang! 😊');
-            
-            document.getElementById('game-area').innerHTML = `
-                <div class="animate-bounce text-6xl mb-6">✨</div>
-                <h3 class="text-2xl mb-6">Halo ${nama}! ✨</h3>
+            if(!nama) return Swal.fire('Eitss!', 'Namamu siapa?', 'warning');
+            tampilkanSoal();
+        }
+
+        function tampilkanSoal() {
+            sfxTimer.play(); // Mulai suara detik jam
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = Math.floor(Math.random() * 10) + 1;
+            const jawabanBenar = a + b;
+            soalSekarang = { a, b, benar: jawabanBenar };
+
+            let pilihan = [jawabanBenar, jawabanBenar + 2, jawabanBenar - 1, jawabanBenar + 3];
+            pilihan = pilihan.sort(() => Math.random() - 0.5);
+
+            document.getElementById('game-container').innerHTML = `
+                <div class="text-blue-500 font-bold mb-4">⭐ Skor: ${skor}</div>
                 <div class="bg-blue-50 p-6 rounded-3xl border-4 border-blue-200 mb-6">
-                    <p class="text-5xl font-bold text-blue-600">8 + 5 = ?</p>
+                    <p class="text-5xl font-black text-blue-600">${a} + ${b}</p>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="cek(12)" class="bg-blue-400 text-white p-6 rounded-2xl text-2xl font-bold shadow-lg">12</button>
-                    <button onclick="cek(13)" class="bg-green-400 text-white p-6 rounded-2xl text-2xl font-bold shadow-lg">13</button>
+                <div class="grid grid-cols-2 gap-3">
+                    ${pilihan.map(p => `
+                        <button onclick="cekJawaban(${p})" class="bg-white border-4 border-blue-100 p-5 rounded-2xl text-2xl font-bold text-blue-600 shadow-md active:scale-90 transition-all">
+                            ${p}
+                        </button>
+                    `).join('')}
                 </div>
             `;
         }
-        function cek(hasil) {
-            if(hasil === 13) alert('HEBAT! Kamu benar! 🏆⭐');
-            else alert('Ups! Coba hitung lagi ya.. 😊');
+
+        function cekJawaban(jawaban) {
+            sfxTimer.pause(); // Berhenti suara detik
+            sfxTimer.currentTime = 0;
+
+            if(jawaban === soalSekarang.benar) {
+                skor += 10;
+                sfxCring.play(); // Bunyi CRING!
+                Swal.fire({
+                    title: 'MANTAP! 🌟',
+                    icon: 'success',
+                    timer: 1000,
+                    showConfirmButton: false
+                }).then(() => tampilkanSoal());
+            } else {
+                sfxTetot.play(); // Bunyi TETOT!
+                Swal.fire({
+                    title: 'OH NO! 😅',
+                    text: 'Coba lagi ya!',
+                    icon: 'error',
+                    confirmButtonText: 'OKE'
+                }).then(() => sfxTimer.play());
+            }
         }
     </script>
 </body>
