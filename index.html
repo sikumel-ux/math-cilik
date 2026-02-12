@@ -3,60 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MathCilik 🚀</title>
+    <title>MathCilik Pro 🚀</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
         body { font-family: 'Fredoka One', cursive; }
+        .lvl-badge { transition: all 0.3s; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
-<body class="bg-gradient-to-b from-blue-400 to-purple-500 min-h-screen flex items-center justify-center p-4 text-white text-center">
+<body class="bg-gradient-to-b from-indigo-500 to-purple-600 min-h-screen flex items-center justify-center p-4 text-white text-center">
     <div class="bg-white rounded-[50px] p-8 shadow-2xl text-gray-800 max-w-sm w-full border-b-[15px] border-gray-200">
         <div id="game-container">
-            <h1 class="text-5xl mb-4">🎮</h1>
-            <h2 class="text-3xl font-bold text-blue-600 mb-6">MathCilik</h2>
-            <input id="nama" type="text" placeholder="Nama kamu..." class="w-full p-4 text-xl border-4 border-blue-100 rounded-3xl mb-6 text-center outline-none focus:border-yellow-400">
-            <button onclick="mulaiGame()" class="w-full bg-orange-500 text-white text-2xl font-bold py-4 rounded-3xl shadow-[0_8px_0_rgb(194,120,0)] active:shadow-none active:translate-y-2 transition-all">
-                GASPOL! 🚀
+            <h1 class="text-6xl mb-4">🏆</h1>
+            <h2 class="text-3xl font-bold text-indigo-600 mb-2">MathCilik Pro</h2>
+            <p class="text-gray-400 mb-6">Kalahkan Rekormu!</p>
+            
+            <div id="highscore-area" class="bg-yellow-50 p-4 rounded-2xl mb-6 border-2 border-yellow-200">
+                <p class="text-sm text-yellow-600 font-bold uppercase">🏆 Skor Tertinggi</p>
+                <p id="top-score-val" class="text-2xl font-black text-yellow-700">0</p>
+            </div>
+
+            <input id="nama" type="text" placeholder="Nama Jagoan..." class="w-full p-4 text-xl border-4 border-indigo-100 rounded-3xl mb-6 text-center outline-none focus:border-indigo-400">
+            <button onclick="mulaiGame()" class="w-full bg-indigo-500 text-white text-2xl font-bold py-5 rounded-3xl shadow-[0_10px_0_rgb(67,56,202)] active:shadow-none active:translate-y-2 transition-all">
+                MAIN SEKARANG! 🚀
             </button>
         </div>
     </div>
 
     <script>
         let skor = 0;
+        let level = 1;
         let soalSekarang = {};
-        
-        // --- DAFTAR SUARA ---
-        const sfxCring = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'); // Benar
-        const sfxTetot = new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3'); // Salah
-        const sfxTimer = new Audio('https://assets.mixkit.co/active_storage/sfx/2030/2030-preview.mp3'); // Detik jam
-        sfxTimer.loop = true;
+        let namaPlayer = "";
+
+        const sfxCring = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3');
+        const sfxTetot = new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3');
+        const sfxLevelUp = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3');
+
+        // Load Highscore saat buka web
+        window.onload = () => {
+            const savedScore = localStorage.getItem('mathCilikHS') || 0;
+            document.getElementById('top-score-val').innerText = savedScore;
+        };
 
         function mulaiGame() {
-            const nama = document.getElementById('nama').value;
-            if(!nama) return Swal.fire('Eitss!', 'Namamu siapa?', 'warning');
+            namaPlayer = document.getElementById('nama').value;
+            if(!namaPlayer) return Swal.fire('Eitss!', 'Namamu siapa Jagoan?', 'warning');
             tampilkanSoal();
         }
 
+        function getLevelName() {
+            if (level >= 10) return "DIAMOND 💎";
+            if (level >= 7) return "PLATINUM 👑";
+            if (level >= 4) return "GOLD 🥇";
+            return "BRONZE 🥉";
+        }
+
         function tampilkanSoal() {
-            sfxTimer.play(); // Mulai suara detik jam
-            const a = Math.floor(Math.random() * 10) + 1;
-            const b = Math.floor(Math.random() * 10) + 1;
+            // Logika Level Up: Angka makin gede tiap level
+            const range = 5 + (level * 5);
+            const a = Math.floor(Math.random() * range) + 1;
+            const b = Math.floor(Math.random() * range) + 1;
             const jawabanBenar = a + b;
             soalSekarang = { a, b, benar: jawabanBenar };
 
-            let pilihan = [jawabanBenar, jawabanBenar + 2, jawabanBenar - 1, jawabanBenar + 3];
-            pilihan = pilihan.sort(() => Math.random() - 0.5);
+            let pilihan = [jawabanBenar, jawabanBenar + Math.floor(Math.random()*5)+1, jawabanBenar - Math.floor(Math.random()*3)-1, jawabanBenar + 10];
+            pilihan = Array.from(new Set(pilihan)).sort(() => Math.random() - 0.5);
 
             document.getElementById('game-container').innerHTML = `
-                <div class="text-blue-500 font-bold mb-4">⭐ Skor: ${skor}</div>
-                <div class="bg-blue-50 p-6 rounded-3xl border-4 border-blue-200 mb-6">
-                    <p class="text-5xl font-black text-blue-600">${a} + ${b}</p>
+                <div class="flex justify-between items-center mb-4 text-sm font-bold">
+                    <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">Level ${level}</span>
+                    <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full">⭐ ${skor}</span>
                 </div>
+                
+                <div class="lvl-badge text-xs font-black text-purple-500 mb-2 uppercase tracking-widest">
+                    Rank: ${getLevelName()}
+                </div>
+
+                <div class="bg-indigo-50 p-8 rounded-[40px] border-4 border-indigo-100 mb-6">
+                    <p class="text-6xl font-black text-indigo-600">${a} + ${b}</p>
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     ${pilihan.map(p => `
-                        <button onclick="cekJawaban(${p})" class="bg-white border-4 border-blue-100 p-5 rounded-2xl text-2xl font-bold text-blue-600 shadow-md active:scale-90 transition-all">
+                        <button onclick="cekJawaban(${p})" class="bg-white border-4 border-indigo-50 hover:border-indigo-400 p-5 rounded-3xl text-3xl font-bold text-indigo-600 shadow-sm active:scale-90 transition-all">
                             ${p}
                         </button>
                     `).join('')}
@@ -65,26 +97,39 @@
         }
 
         function cekJawaban(jawaban) {
-            sfxTimer.pause(); // Berhenti suara detik
-            sfxTimer.currentTime = 0;
-
             if(jawaban === soalSekarang.benar) {
                 skor += 10;
-                sfxCring.play(); // Bunyi CRING!
-                Swal.fire({
-                    title: 'MANTAP! 🌟',
-                    icon: 'success',
-                    timer: 1000,
-                    showConfirmButton: false
-                }).then(() => tampilkanSoal());
+                sfxCring.play();
+                
+                // Cek Level Up tiap kelipatan 50 skor
+                if(skor % 50 === 0) {
+                    level++;
+                    sfxLevelUp.play();
+                    Swal.fire({
+                        title: 'LEVEL UP! 🔥',
+                        text: `Selamat ${namaPlayer}, kamu naik ke Level ${level}!`,
+                        icon: 'success',
+                        confirmButtonText: 'LANJUTKAN!'
+                    }).then(() => tampilkanSoal());
+                } else {
+                    tampilkanSoal();
+                }
             } else {
-                sfxTetot.play(); // Bunyi TETOT!
+                sfxTetot.play();
+                updateHighscore();
                 Swal.fire({
-                    title: 'OH NO! 😅',
-                    text: 'Coba lagi ya!',
+                    title: 'GAME OVER! 💥',
+                    text: `Skor akhirmu: ${skor}. Main lagi yuk!`,
                     icon: 'error',
-                    confirmButtonText: 'OKE'
-                }).then(() => sfxTimer.play());
+                    confirmButtonText: 'COBA LAGI'
+                }).then(() => location.reload());
+            }
+        }
+
+        function updateHighscore() {
+            const currentHS = localStorage.getItem('mathCilikHS') || 0;
+            if(skor > currentHS) {
+                localStorage.setItem('mathCilikHS', skor);
             }
         }
     </script>
