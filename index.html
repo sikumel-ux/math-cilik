@@ -5,69 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MathCilik 🚀</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+        body { font-family: 'Fredoka One', cursive; }
+    </style>
 </head>
-<body class="bg-blue-50 font-sans text-gray-800">
-    <div id="root"></div>
-    <script type="text/babel">
-        const { useState } = React;
+<body class="bg-gradient-to-b from-blue-400 to-purple-500 min-h-screen flex items-center justify-center p-4 text-white text-center">
+    <div class="bg-white rounded-[50px] p-10 shadow-2xl text-gray-800 max-w-sm w-full border-b-[15px] border-gray-200">
+        <h1 class="text-5xl mb-4">🚀</h1>
+        <h2 class="text-4xl font-bold text-blue-600 mb-2">MathCilik</h2>
+        <p class="text-gray-500 text-lg mb-8">Siap jadi jagoan matematika?</p>
+        
+        <div id="game-area">
+            <input id="nama" type="text" placeholder="Tulis namamu..." class="w-full p-5 text-2xl border-4 border-blue-100 rounded-3xl mb-6 focus:border-yellow-400 outline-none transition-all text-center">
+            <button onclick="mulai()" class="w-full bg-orange-500 hover:bg-orange-600 text-white text-3xl font-bold py-5 rounded-3xl shadow-[0_10px_0_rgb(194,120,0)] active:shadow-none active:translate-y-2 transition-all">
+                MAIN! 🎮
+            </button>
+        </div>
+    </div>
 
-        function App() {
-            const [page, setPage] = useState('login');
-            const [user, setUser] = useState('');
-
-            return (
-                <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
-                    {page === 'login' && (
-                        <div className="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-sm border-t-8 border-yellow-400">
-                            <h1 className="text-6xl mb-4">🎮</h1>
-                            <h2 className="text-3xl font-black text-blue-600 mb-6">MathCilik</h2>
-                            <p className="mb-6 text-gray-500 font-bold">Ayo Belajar Sambil Main!</p>
-                            <input 
-                                type="text" 
-                                placeholder="Tulis namamu..." 
-                                className="w-full p-4 text-xl border-4 border-blue-100 rounded-2xl mb-4 focus:border-blue-400 outline-none"
-                                onChange={(e) => setUser(e.target.value)}
-                            />
-                            <button 
-                                onClick={() => setPage('quiz')}
-                                className="w-full bg-green-500 hover:bg-green-600 text-white text-2xl font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all"
-                            >
-                                GAS MAIN! 🚀
-                            </button>
-                        </div>
-                    )}
-
-                    {page === 'quiz' && (
-                        <div className="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border-t-8 border-purple-400">
-                            <div className="flex justify-between mb-8 text-lg font-bold text-gray-400">
-                                <span>Soal 1/10</span>
-                                <span>Skor: 0</span>
-                            </div>
-                            <h2 className="text-6xl font-black text-blue-600 mb-10">7 + 5 = ?</h2>
-                            <div className="grid grid-cols-2 gap-4">
-                                {[10, 12, 11, 13].map(num => (
-                                    <button 
-                                        key={num}
-                                        onClick={() => alert(num === 12 ? 'HEBAT! Benar! 🎉' : 'Coba hitung lagi ya.. 😅')}
-                                        className="bg-blue-100 hover:bg-blue-500 hover:text-white text-3xl font-bold py-8 rounded-3xl transition-all active:scale-90"
-                                    >
-                                        {num}
-                                    </button>
-                                ))}
-                            </div>
-                            <button onClick={() => setPage('login')} className="mt-8 text-gray-400 underline font-bold">Berhenti</button>
-                        </div>
-                    )}
+    <script>
+        function mulai() {
+            const nama = document.getElementById('nama').value;
+            if(!nama) return alert('Tulis namamu dulu dong sayang! 😊');
+            
+            document.getElementById('game-area').innerHTML = `
+                <div class="animate-bounce text-6xl mb-6">✨</div>
+                <h3 class="text-2xl mb-6">Halo ${nama}! ✨</h3>
+                <div class="bg-blue-50 p-6 rounded-3xl border-4 border-blue-200 mb-6">
+                    <p class="text-5xl font-bold text-blue-600">8 + 5 = ?</p>
                 </div>
-            );
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="cek(12)" class="bg-blue-400 text-white p-6 rounded-2xl text-2xl font-bold shadow-lg">12</button>
+                    <button onclick="cek(13)" class="bg-green-400 text-white p-6 rounded-2xl text-2xl font-bold shadow-lg">13</button>
+                </div>
+            `;
         }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        function cek(hasil) {
+            if(hasil === 13) alert('HEBAT! Kamu benar! 🏆⭐');
+            else alert('Ups! Coba hitung lagi ya.. 😊');
+        }
     </script>
 </body>
-  </html>
-  
+</html>
