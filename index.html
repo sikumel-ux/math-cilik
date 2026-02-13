@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6366f1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Matematika Infinity </title>
@@ -124,6 +128,12 @@
                 });
             } catch (e) { console.error(e); }
         }
+        // Register Service Worker (Biar bisa diinstal)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('https://math-cilik.pages.dev/sw.js')
+    .catch(err => console.log("PWA Service Worker belum aktif"));
+                        }
+                    
     </script>
 </body>
 </html>
