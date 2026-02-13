@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+body {
+    font-family: 'Fredoka One', cursive;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Animasi Tombol */
+button:active {
+    transform: scale(0.95) rotate(-2deg);
+}
+
+/* Animasi Pertanyaan Muncul */
+#pertanyaan {
+    animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Shake effect saat salah */
+.shake {
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
