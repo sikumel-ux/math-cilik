@@ -2,36 +2,38 @@ const API_URL = "https://mathe.sekawanation.workers.dev";
 let skor = 0;
 let namaPlayer = "";
 let jawabanBenar = 0;
+let isPaused = false;
 
 // Audio Assets
 const sfxBenar = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3');
 const sfxSalah = new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3');
 
-// Load Leaderboard saat halaman dibuka
+// 1. Load Leaderboard saat buka web
 window.onload = async () => {
     try {
         const res = await fetch(`${API_URL}/leaderboard`);
         const data = await res.json();
         const listContainer = document.getElementById('list-juara');
         
-        if (data.length > 0) {
+        if (data && data.length > 0) {
             listContainer.innerHTML = data.map((p, i) => `
-                <div class="flex justify-between bg-indigo-50 p-2 rounded-lg">
+                <div class="flex justify-between bg-indigo-50 p-2 rounded-lg border-b-2 border-indigo-100">
                     <span>${i+1}. <b>${p.nama}</b></span>
                     <span class="font-bold text-indigo-600">${p.skor}</span>
                 </div>
             `).join('');
         } else {
-            listContainer.innerHTML = `<p class="text-center text-gray-400">Belum ada skor.</p>`;
+            listContainer.innerHTML = `<p class="text-center text-gray-400 italic">Belum ada skor. Jadilah yang pertama!</p>`;
         }
     } catch (e) {
-        console.error("Gagal load leaderboard");
+        console.error("Gagal ambil leaderboard");
     }
 };
 
+// 2. Fungsi Mulai Game
 function mulaiGame() {
     namaPlayer = document.getElementById('nama').value;
-    if(!namaPlayer) return Swal.fire('Eitss!', 'Namamu siapa Jagoan?', 'warning');
+    if(!namaPlayer) return Swal.fire('Eitss!', 'Namamu siapa?', 'warning');
     
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
@@ -39,6 +41,22 @@ function mulaiGame() {
     buatSoal();
 }
 
+// 3. Fungsi Pause/Istirahat
+function togglePause() {
+    isPaused = !isPaused;
+    const pauseScreen = document.getElementById('pause-screen');
+    const gameContent = document.getElementById('game-content');
+    
+    if (isPaused) {
+        pauseScreen.classList.remove('hidden');
+        gameContent.classList.add('blur-content');
+    } else {
+        pauseScreen.classList.add('hidden');
+        gameContent.classList.remove('blur-content');
+    }
+}
+
+// 4. Logika Membuat Soal
 function buatSoal() {
     let range = 10 + Math.floor(skor / 50); 
     let a = Math.floor(Math.random() * range) + 1;
@@ -58,20 +76,27 @@ function buatSoal() {
 
     const container = document.getElementById('pilihan-jawaban');
     container.innerHTML = pilihan.map(p => `
-        <button onclick="cekJawaban(${p})" class="bg-white border-4 border-indigo-50 p-4 rounded-2xl text-2xl font-bold text-indigo-600 hover:border-indigo-400 active:scale-95 transition-all">${p}</button>
+        <button onclick="cekJawaban(${p})" class="bg-white border-4 border-indigo-50 p-4 rounded-2xl text-2xl font-bold text-indigo-600 hover:border-indigo-400 active:scale-95 transition-all shadow-sm">${p}</button>
     `).join('');
 }
 
+// 5. Cek Jawaban & Kirim Skor Otomatis
 async function cekJawaban(pilih) {
+    if (isPaused) return;
+
     if(pilih === jawabanBenar) {
         skor += 10;
         sfxBenar.play();
         
-        // Kembang Api (Confetti)
+        // Simpan setiap jawaban benar (Anti-Reload)
+        simpanSkor();
+
+        // Efek Kembang Api
         confetti({
             particleCount: 80,
             spread: 60,
-            origin: { y: 0.6 }
+            origin: { y: 0.6 },
+            colors: ['#6366f1', '#f472b6']
         });
 
         setTimeout(buatSoal, 500);
@@ -79,18 +104,21 @@ async function cekJawaban(pilih) {
         sfxSalah.play();
         document.getElementById('app').classList.add('shake');
         
-        // Simpan ke database
+        // Simpan skor terakhir saat kalah
         await simpanSkor();
         
         Swal.fire({
-            title: 'WADUH! 💥',
-            text: `Skor ${namaPlayer}: ${skor}`,
+            title: 'GAME OVER! 💥',
+            text: `Skor akhir ${namaPlayer}: ${skor}`,
             icon: 'error',
-            confirmButtonText: 'MAIN LAGI'
+            confirmButtonText: 'MAIN LAGI',
+            confirmButtonColor: '#6366f1',
+            allowOutsideClick: false
         }).then(() => location.reload());
     }
 }
 
+// 6. Fungsi Komunikasi ke Cloudflare Worker
 async function simpanSkor() {
     try {
         await fetch(`${API_URL}/submit-score`, {
@@ -99,11 +127,12 @@ async function simpanSkor() {
             body: JSON.stringify({ nama: namaPlayer, skor: skor })
         });
     } catch (e) {
-        console.error("Gagal simpan skor");
+        console.error("Koneksi database terganggu");
     }
 }
 
-// Register PWA Service Worker
+// Register Service Worker PWA
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
-}
+                   }
+        
