@@ -10,10 +10,11 @@ let waktuSisa = 100;
 const sfxBenar = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3');
 const sfxSalah = new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3');
 
-window.onload = async () => {
+window.onload = () => {
     loadLeaderboard();
-    const savedNama = localStorage.getItem('math_nama');
-    if (savedNama) document.getElementById('nama').value = savedNama;
+    if(localStorage.getItem('math_nama')) {
+        document.getElementById('nama').value = localStorage.getItem('math_nama');
+    }
 };
 
 async function loadLeaderboard() {
@@ -37,14 +38,17 @@ function mulaiGame() {
     if(!namaPlayer) return Swal.fire('Eitss!', 'Namamu siapa?', 'warning');
     
     localStorage.setItem('math_nama', namaPlayer);
+    
+    // Reset State
     skor = 0;
     nyawa = 3;
-    updateNyawaUI();
+    isPaused = false;
     
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
     document.getElementById('display-nama').innerText = namaPlayer;
     
+    updateNyawaUI();
     buatSoal();
 }
 
@@ -57,13 +61,58 @@ function updateNyawaUI() {
     container.innerHTML = html;
 }
 
+function buatSoal() {
+    try {
+        // 1. Tentukan Angka (Min 1, Max sesuai skor)
+        let kesulitan = Math.floor(skor / 50);
+        let a = Math.floor(Math.random() * (10 + kesulitan)) + 1;
+        let b = Math.floor(Math.random() * (10 + kesulitan)) + 1;
+        jawabanBenar = a + b;
+
+        // 2. Tampilkan Teks
+        document.getElementById('pertanyaan').innerText = `${a} + ${b}`;
+        document.getElementById('display-skor').innerText = skor;
+
+        // 3. Racik Pilihan Jawaban
+        let pilihan = [jawabanBenar];
+        while(pilihan.length < 4) {
+            let offset = Math.floor(Math.random() * 10) - 5;
+            let salah = jawabanBenar + offset;
+            if(salah > 0 && !pilihan.includes(salah)) {
+                pilihan.push(salah);
+            }
+        }
+        pilihan.sort(() => Math.random() - 0.5);
+
+        // 4. Render Tombol ke DOM
+        const container = document.getElementById('pilihan-jawaban');
+        container.innerHTML = ""; // Bersihkan container
+        
+        pilihan.forEach(angka => {
+            const btn = document.createElement('button');
+            btn.type = "button";
+            btn.innerText = angka;
+            btn.className = "bg-white border-4 border-indigo-50 p-4 rounded-2xl text-2xl font-bold text-indigo-600 shadow-sm hover:border-indigo-200 active:scale-95 transition-all";
+            btn.onclick = () => {
+                console.log("Memilih:", angka);
+                cekJawaban(angka);
+            };
+            container.appendChild(btn);
+        });
+
+        // 5. Jalankan Timer
+        startTimer();
+        
+    } catch (err) {
+        console.error("Error saat buat soal:", err);
+    }
+}
+
 function startTimer() {
     clearInterval(timerInterval);
     waktuSisa = 100;
     const bar = document.getElementById('timer-bar');
-    
-    // Kecepatan timer makin tinggi skor makin cepat
-    const speed = Math.max(15, 80 - Math.floor(skor / 10));
+    const speed = Math.max(10, 80 - Math.floor(skor / 10));
 
     timerInterval = setInterval(() => {
         if (!isPaused) {
@@ -77,51 +126,11 @@ function startTimer() {
     }, speed);
 }
 
-function buatSoal() {
-    // 1. Tentukan angka (Minimal 1 agar tidak 0 + 0)
-    let range = 10 + Math.floor(skor / 50); 
-    let a = Math.floor(Math.random() * range) + 1;
-    let b = Math.floor(Math.random() * range) + 1;
-    jawabanBenar = a + b;
-
-    // 2. Update Tampilan
-    document.getElementById('pertanyaan').innerText = `${a} + ${b}`;
-    document.getElementById('display-skor').innerText = skor;
-
-    // 3. Buat Pilihan Jawaban
-    let pilihan = [jawabanBenar];
-    while(pilihan.length < 4) {
-        // Biar angka salahnya mirip-mirip jawaban benar
-        let acak = Math.floor(Math.random() * 10) - 5; 
-        let salah = jawabanBenar + acak;
-        
-        if(salah !== jawabanBenar && salah > 0 && !pilihan.includes(salah)) {
-            pilihan.push(salah);
-        }
-    }
-    
-    // Acak posisi tombol
-    pilihan.sort(() => Math.random() - 0.5);
-
-    // 4. Masukkan ke HTML
-    const container = document.getElementById('pilihan-jawaban');
-    container.innerHTML = ""; 
-    
-    pilihan.forEach(angka => {
-        const btn = document.createElement('button');
-        btn.innerText = angka;
-        btn.className = "bg-white border-4 border-indigo-50 p-4 rounded-2xl text-2xl font-bold text-indigo-600 shadow-sm hover:border-indigo-200 active:scale-95 transition-all";
-        btn.onclick = () => cekJawaban(angka);
-        container.appendChild(btn);
-    });
-    
-    startTimer();
-}
-
 async function cekJawaban(pilih) {
     if (isPaused) return;
-
-    if(parseInt(pilih) === jawabanBenar) {
+    
+    // Pastikan membandingkan angka dengan angka
+    if (Number(pilih) === jawabanBenar) {
         clearInterval(timerInterval);
         skor += 10;
         sfxBenar.play();
@@ -174,5 +183,4 @@ function togglePause() {
     isPaused = !isPaused;
     document.getElementById('pause-screen').classList.toggle('hidden');
     document.getElementById('game-content').classList.toggle('blur-content');
-                         }
-                
+            }
