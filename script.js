@@ -3,21 +3,17 @@ let skor = 0;
 let namaPlayer = "";
 let jawabanBenar = 0;
 let isPaused = false;
+let nyawa = 3;
+let timerInterval;
+let waktuSisa = 100;
 
 const sfxBenar = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3');
 const sfxSalah = new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3');
 
-// 1. Load Data Saat Buka Web
 window.onload = async () => {
     loadLeaderboard();
-    
-    // Cek jika ada sesi tertinggal
     const savedNama = localStorage.getItem('math_nama');
-    const savedSkor = localStorage.getItem('math_skor');
-    if (savedNama) {
-        document.getElementById('nama').value = savedNama;
-        console.log("Sesi ditemukan untuk: " + savedNama);
-    }
+    if (savedNama) document.getElementById('nama').value = savedNama;
 };
 
 async function loadLeaderboard() {
@@ -33,23 +29,17 @@ async function loadLeaderboard() {
                 </div>
             `).join('');
         }
-    } catch (e) { console.error("Gagal load leaderboard"); }
+    } catch (e) { console.log("Leaderboard error"); }
 }
 
-// 2. Logika Mulai / Resume
 function mulaiGame() {
     namaPlayer = document.getElementById('nama').value.trim();
     if(!namaPlayer) return Swal.fire('Eitss!', 'Namamu siapa?', 'warning');
     
-    const savedNama = localStorage.getItem('math_nama');
-    // Jika ganti nama, mulai dari 0. Jika nama sama, teruskan skor.
-    if (namaPlayer === savedNama) {
-        skor = parseInt(localStorage.getItem('math_skor')) || 0;
-    } else {
-        skor = 0;
-        localStorage.setItem('math_nama', namaPlayer);
-        localStorage.setItem('math_skor', 0);
-    }
+    localStorage.setItem('math_nama', namaPlayer);
+    skor = 0;
+    nyawa = 3;
+    updateNyawaUI();
     
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
@@ -57,10 +47,33 @@ function mulaiGame() {
     buatSoal();
 }
 
-function togglePause() {
-    isPaused = !isPaused;
-    document.getElementById('pause-screen').classList.toggle('hidden');
-    document.getElementById('game-content').classList.toggle('blur-content');
+function updateNyawaUI() {
+    const container = document.getElementById('lives-container');
+    let html = "";
+    for(let i=0; i<3; i++) {
+        html += `<span class="${i >= nyawa ? 'heart-lost' : ''}">❤️</span> `;
+    }
+    container.innerHTML = html;
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    waktuSisa = 100;
+    const bar = document.getElementById('timer-bar');
+    
+    // Makin tinggi skor, makin cepat waktunya habis (min 15ms per step)
+    const intervalSpeed = Math.max(15, 80 - Math.floor(skor / 10));
+
+    timerInterval = setInterval(() => {
+        if (!isPaused) {
+            waktuSisa -= 1;
+            bar.style.width = waktuSisa + "%";
+            if (waktuSisa <= 0) {
+                clearInterval(timerInterval);
+                kurangiNyawa("Waktu Habis! ⏰");
+            }
+        }
+    }, intervalSpeed);
 }
 
 function buatSoal() {
@@ -81,35 +94,51 @@ function buatSoal() {
     pilihan.sort(() => Math.random() - 0.5);
 
     document.getElementById('pilihan-jawaban').innerHTML = pilihan.map(p => `
-        <button onclick="cekJawaban(${p})" class="bg-white border-4 border-indigo-50 p-4 rounded-2xl text-2xl font-bold text-indigo-600 hover:border-indigo-400 active:scale-95 transition-all shadow-sm">${p}</button>
+        <button onclick="cekJawaban(${p})" class="bg-white border-4 border-indigo-50 p-4 rounded-2xl text-2xl font-bold text-indigo-600 shadow-sm">${p}</button>
     `).join('');
+    
+    startTimer();
 }
 
 async function cekJawaban(pilih) {
-    if (isPaused) return; // Lock saat pause
+    if (isPaused) return;
 
     if(pilih === jawabanBenar) {
+        clearInterval(timerInterval);
         skor += 10;
         sfxBenar.play();
-        localStorage.setItem('math_skor', skor); // Simpan di HP
-        simpanSkor(); // Simpan di Cloud
-        
-        confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-        setTimeout(buatSoal, 500);
+        simpanSkor(); 
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        setTimeout(buatSoal, 400);
     } else {
-        sfxSalah.play();
-        document.getElementById('app').classList.add('shake');
-        
-        // Game Over: Hapus progres di HP tapi rekor di Cloud tetap ada
-        localStorage.removeItem('math_skor');
+        kurangiNyawa("Jawaban Salah! ❌");
+    }
+}
+
+async function kurangiNyawa(pesan) {
+    clearInterval(timerInterval);
+    nyawa--;
+    sfxSalah.play();
+    updateNyawaUI();
+    document.getElementById('app').classList.add('shake');
+    setTimeout(() => document.getElementById('app').classList.remove('shake'), 400);
+
+    if (nyawa <= 0) {
         await simpanSkor();
-        
         Swal.fire({
             title: 'GAME OVER! 💥',
-            text: `Skor ${namaPlayer}: ${skor}`,
+            text: `Skor akhir ${namaPlayer}: ${skor}`,
             icon: 'error',
             confirmButtonText: 'MAIN LAGI'
         }).then(() => location.reload());
+    } else {
+        const tips = ["Fokus jagoan!", "Pasti bisa!", "Jangan menyerah!", "Hati-hati!"];
+        Swal.fire({
+            title: pesan,
+            text: tips[Math.floor(Math.random() * tips.length)],
+            timer: 1200,
+            showConfirmButton: false
+        }).then(() => buatSoal());
     }
 }
 
@@ -120,6 +149,12 @@ async function simpanSkor() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nama: namaPlayer, skor: skor })
         });
-    } catch (e) { console.log("Cloud offline"); }
-            }
-        
+    } catch (e) {}
+}
+
+function togglePause() {
+    isPaused = !isPaused;
+    document.getElementById('pause-screen').classList.toggle('hidden');
+    document.getElementById('game-content').classList.toggle('blur-content');
+}
+    
