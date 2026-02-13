@@ -1,0 +1,15 @@
+{
+  "name": "Matematika Infinity",
+  "short_name": "Matematika",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#6366f1",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "haidar.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
