@@ -1,19 +1,31 @@
+/* 1. IMPORT FONT LUCU UNTUK ANAK-ANAK */
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
+/* 2. LAYOUT DASAR */
 body {
     font-family: 'Fredoka One', cursive;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Mencegah scroll yang gak perlu di HP */
 }
 
+/* 3. UTILITAS */
 .hidden {
     display: none;
 }
 
-/* Efek saat tombol ditekan */
-button:active {
-    transform: scale(0.95);
+/* 4. ANIMASI TOMBOL (JUICY FEEL) */
+button {
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    user-select: none;
 }
 
-/* Animasi Munculnya Soal */
+button:active {
+    transform: scale(0.9) rotate(-2deg);
+}
+
+/* 5. ANIMASI PERTANYAAN MUNCUL (BOUNCE) */
 #pertanyaan {
     animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
@@ -23,20 +35,68 @@ button:active {
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* Animasi Getar saat Salah */
+/* 6. EFEK GETAR SAAT SALAH (SHAKE) */
 .shake {
-    animation: shake 0.4s;
+    animation: shake 0.4s ease-in-out;
 }
 
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-8px); }
-    75% { transform: translateX(8px); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-10px); }
+    80% { transform: translateX(10px); }
 }
 
-/* Transisi samar saat Pause */
-.blur-content {
-    filter: blur(4px);
-    opacity: 0.2;
-    pointer-events: none;
+/* 7. PROGRESS BAR TIMER */
+#timer-bar {
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
 }
+
+/* 8. SISTEM NYAWA (HATI) */
+#lives-container span {
+    display: inline-block;
+    transition: all 0.4s ease;
+}
+
+.heart-lost {
+    opacity: 0.15;
+    filter: grayscale(1) blur(1px);
+    transform: scale(0.7);
+}
+
+/* 9. EFEK BLUR SAAT PAUSE */
+.blur-content {
+    filter: blur(8px);
+    opacity: 0.3;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+/* 10. TAMPILAN PAPAN SKOR (LEADERBOARD) */
+#list-juara div {
+    animation: slideIn 0.5s ease forwards;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 11. CUSTOM SCROLLBAR (BIAR RAPI DI HP) */
+#list-juara::-webkit-scrollbar {
+    width: 4px;
+}
+#list-juara::-webkit-scrollbar-thumb {
+    background: #e0e7ff;
+    border-radius: 10px;
+}
+
+/* 12. OVERLAY PAUSE SCREEN */
+#pause-screen {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+    border-radius: 35px;
+          }
+    
