@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matematika Infinity</title>
+    <title>MathCilik Infinity Pro 🚀</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
@@ -20,13 +20,13 @@
         
         <div id="start-screen">
             <h1 class="text-4xl mb-2">🏆</h1>
-            <h2 class="text-2xl font-bold text-indigo-600 mb-6">Matematika Infinity</h2>
-            <input id="nama" type="text" placeholder="Nama Jagoan..." class="w-full p-4 text-lg border-4 border-indigo-50 rounded-2xl mb-4 text-center outline-none focus:border-indigo-400">
+            <h2 class="text-2xl font-bold text-indigo-600 mb-6">MathCilik Global</h2>
+            <input id="nama" type="text" placeholder="Nama Jagoan..." class="w-full p-4 text-lg border-4 border-indigo-50 rounded-2xl mb-4 text-center outline-none focus:border-indigo-400 text-gray-700">
             <button onclick="mulaiGame()" class="w-full bg-indigo-500 text-white text-xl font-bold py-4 rounded-2xl shadow-[0_6px_0_rgb(67,56,202)] active:shadow-none active:translate-y-1 transition-all">MAIN SEKARANG!</button>
             
             <div id="leaderboard-section" class="mt-8">
-                <p class="text-indigo-600 font-bold mb-3">5 JAGOAN TERATAS</p>
-                <div id="list-juara" class="text-left text-sm space-y-2">
+                <p class="text-indigo-600 font-bold mb-3">🏅 5 JAGOAN TERATAS</p>
+                <div id="list-juara" class="text-left text-sm space-y-2 max-h-40 overflow-y-auto">
                     <p class="text-center text-gray-400 italic">Memuat peringkat...</p>
                 </div>
             </div>
@@ -34,27 +34,30 @@
 
         <div id="game-screen" class="hidden relative">
             <div class="flex justify-between items-center mb-2 font-bold text-indigo-600">
-                <div id="lives-container" class="text-xl text-red-500">❤️ ❤️ ❤️</div>
-                <div class="flex gap-2">
+                <div id="lives-container" class="text-xl flex gap-1">
+                    </div>
+                <div class="flex gap-2 items-center">
                     <button onclick="togglePause()" class="bg-indigo-100 px-3 py-1 rounded-full hover:bg-indigo-200 transition-colors">⏸️</button>
-                    <span class="bg-yellow-100 px-3 py-1 rounded-full">⭐ <span id="display-skor">0</span></span>
+                    <span class="bg-yellow-100 px-3 py-1 rounded-full text-sm">⭐ <span id="display-skor">0</span></span>
                 </div>
             </div>
 
             <div class="w-full bg-gray-100 rounded-full h-2 mb-6 overflow-hidden">
-                <div id="timer-bar" class="bg-indigo-500 h-full w-full transition-all duration-100 linear"></div>
+                <div id="timer-bar" class="bg-indigo-500 h-full w-full"></div>
             </div>
 
             <div id="pause-screen" class="hidden absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/90 rounded-[30px] backdrop-blur-sm">
-                <h2 class="text-3xl font-bold text-indigo-600 mb-2">Istirahat!</h2>
+                <h2 class="text-3xl font-bold text-indigo-600 mb-2">Istirahat! 🍦</h2>
                 <button onclick="togglePause()" class="bg-green-500 text-white px-8 py-4 rounded-2xl font-bold shadow-[0_5px_0_rgb(34,197,94)] active:shadow-none active:translate-y-1 transition-all">LANJUT 🚀</button>
             </div>
 
             <div id="game-content">
+                <p id="display-nama" class="text-xs text-gray-400 mb-1 uppercase tracking-widest font-bold"></p>
                 <div class="bg-indigo-50 p-10 rounded-[30px] border-4 border-indigo-100 mb-6">
                     <p id="pertanyaan" class="text-5xl font-black text-indigo-600">0 + 0</p>
                 </div>
-                <div id="pilihan-jawaban" class="grid grid-cols-2 gap-3"></div>
+                <div id="pilihan-jawaban" class="grid grid-cols-2 gap-3">
+                    </div>
             </div>
         </div>
     </div>
