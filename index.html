@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MathCilik Pro 🚀</title>
+    <title>Game Matematika</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -17,22 +17,25 @@
     <div class="bg-white rounded-[50px] p-8 shadow-2xl text-gray-800 max-w-sm w-full border-b-[15px] border-gray-200">
         <div id="game-container">
             <h1 class="text-6xl mb-4">🏆</h1>
-            <h2 class="text-3xl font-bold text-indigo-600 mb-2">MathCilik Pro</h2>
+            <h2 class="text-3xl font-bold text-indigo-600 mb-2">Game Matematika</h2>
             <p class="text-gray-400 mb-6">Kalahkan Rekormu!</p>
             
             <div id="highscore-area" class="bg-yellow-50 p-4 rounded-2xl mb-6 border-2 border-yellow-200">
                 <p class="text-sm text-yellow-600 font-bold uppercase">🏆 Skor Tertinggi</p>
-                <p id="top-score-val" class="text-2xl font-black text-yellow-700">0</p>
+                <p id="top-score-val" class="text-2xl font-black text-yellow-700">Loading...</p>
             </div>
 
-            <input id="nama" type="text" placeholder="Nama Jagoan..." class="w-full p-4 text-xl border-4 border-indigo-100 rounded-3xl mb-6 text-center outline-none focus:border-indigo-400">
+            <input id="nama" type="text" placeholder="Nama kamu.." class="w-full p-4 text-xl border-4 border-indigo-100 rounded-3xl mb-6 text-center outline-none focus:border-indigo-400">
             <button onclick="mulaiGame()" class="w-full bg-indigo-500 text-white text-2xl font-bold py-5 rounded-3xl shadow-[0_10px_0_rgb(67,56,202)] active:shadow-none active:translate-y-2 transition-all">
-                MAIN SEKARANG! 🚀
+                MAIN SEKARANG 🔥
             </button>
         </div>
     </div>
 
     <script>
+        // --- KONFIGURASI API ---
+        const API_URL = "https://mathe.sekawanation.workers.dev"; 
+
         let skor = 0;
         let level = 1;
         let soalSekarang = {};
@@ -42,10 +45,19 @@
         const sfxTetot = new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3');
         const sfxLevelUp = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3');
 
-        // Load Highscore saat buka web
-        window.onload = () => {
-            const savedScore = localStorage.getItem('mathCilikHS') || 0;
-            document.getElementById('top-score-val').innerText = savedScore;
+        // Ambil Highscore dari Database saat web dibuka
+        window.onload = async () => {
+            try {
+                const res = await fetch(`${API_URL}/leaderboard`);
+                const data = await res.json();
+                if(data.length > 0) {
+                    document.getElementById('top-score-val').innerText = `${data[0].nama}: ${data[0].skor}`;
+                } else {
+                    document.getElementById('top-score-val').innerText = "0";
+                }
+            } catch (e) {
+                document.getElementById('top-score-val').innerText = "Offline";
+            }
         };
 
         function mulaiGame() {
@@ -62,7 +74,6 @@
         }
 
         function tampilkanSoal() {
-            // Logika Level Up: Angka makin gede tiap level
             const range = 5 + (level * 5);
             const a = Math.floor(Math.random() * range) + 1;
             const b = Math.floor(Math.random() * range) + 1;
@@ -77,15 +88,10 @@
                     <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">Level ${level}</span>
                     <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full">⭐ ${skor}</span>
                 </div>
-                
-                <div class="lvl-badge text-xs font-black text-purple-500 mb-2 uppercase tracking-widest">
-                    Rank: ${getLevelName()}
-                </div>
-
+                <div class="lvl-badge text-xs font-black text-purple-500 mb-2 uppercase tracking-widest">Rank: ${getLevelName()}</div>
                 <div class="bg-indigo-50 p-8 rounded-[40px] border-4 border-indigo-100 mb-6">
                     <p class="text-6xl font-black text-indigo-600">${a} + ${b}</p>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     ${pilihan.map(p => `
                         <button onclick="cekJawaban(${p})" class="bg-white border-4 border-indigo-50 hover:border-indigo-400 p-5 rounded-3xl text-3xl font-bold text-indigo-600 shadow-sm active:scale-90 transition-all">
@@ -96,40 +102,40 @@
             `;
         }
 
-        function cekJawaban(jawaban) {
+        async function cekJawaban(jawaban) {
             if(jawaban === soalSekarang.benar) {
                 skor += 10;
                 sfxCring.play();
-                
-                // Cek Level Up tiap kelipatan 50 skor
                 if(skor % 50 === 0) {
                     level++;
                     sfxLevelUp.play();
-                    Swal.fire({
-                        title: 'LEVEL UP! 🔥',
-                        text: `Selamat ${namaPlayer}, kamu naik ke Level ${level}!`,
-                        icon: 'success',
-                        confirmButtonText: 'LANJUTKAN!'
-                    }).then(() => tampilkanSoal());
+                    Swal.fire({ title: 'LEVEL UP! 🔥', text: `Selamat ${namaPlayer}, naik ke Level ${level}!`, icon: 'success' }).then(() => tampilkanSoal());
                 } else {
                     tampilkanSoal();
                 }
             } else {
                 sfxTetot.play();
-                updateHighscore();
+                // SIMPAN KE CLOUD SEBELUM REFRESH
+                await simpanKeCloud(namaPlayer, skor);
+                
                 Swal.fire({
                     title: 'GAME OVER! 💥',
-                    text: `Skor akhirmu: ${skor}. Main lagi yuk!`,
+                    text: `Skor ${namaPlayer}: ${skor}. Skor sudah disimpan di Leaderboard!`,
                     icon: 'error',
-                    confirmButtonText: 'COBA LAGI'
+                    confirmButtonText: 'MAIN LAGI'
                 }).then(() => location.reload());
             }
         }
 
-        function updateHighscore() {
-            const currentHS = localStorage.getItem('mathCilikHS') || 0;
-            if(skor > currentHS) {
-                localStorage.setItem('mathCilikHS', skor);
+        async function simpanKeCloud(nama, skor) {
+            try {
+                await fetch(`${API_URL}/submit-score`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nama, skor })
+                });
+            } catch (e) {
+                console.error("Gagal simpan skor ke awan");
             }
         }
     </script>
