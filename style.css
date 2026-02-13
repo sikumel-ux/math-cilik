@@ -8,12 +8,12 @@ body {
     display: none;
 }
 
-/* Animasi Tombol */
+/* Efek saat tombol ditekan */
 button:active {
-    transform: scale(0.95) rotate(-2deg);
+    transform: scale(0.95);
 }
 
-/* Animasi Pertanyaan Muncul */
+/* Animasi Munculnya Soal */
 #pertanyaan {
     animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
@@ -23,13 +23,20 @@ button:active {
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* Shake effect saat salah */
+/* Animasi Getar saat Salah */
 .shake {
-    animation: shake 0.5s;
+    animation: shake 0.4s;
 }
 
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    75% { transform: translateX(10px); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+/* Transisi samar saat Pause */
+.blur-content {
+    filter: blur(4px);
+    opacity: 0.2;
+    pointer-events: none;
 }
