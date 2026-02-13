@@ -3,139 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Matematika</title>
+    <title>MathCilik - Global Rank 🏆</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
         body { font-family: 'Fredoka One', cursive; }
-        .lvl-badge { transition: all 0.3s; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body class="bg-gradient-to-b from-indigo-500 to-purple-600 min-h-screen flex items-center justify-center p-4 text-white text-center">
-    <div class="bg-white rounded-[50px] p-8 shadow-2xl text-gray-800 max-w-sm w-full border-b-[15px] border-gray-200">
+    <div class="bg-white rounded-[40px] p-6 shadow-2xl text-gray-800 max-w-sm w-full border-b-[10px] border-gray-200">
         <div id="game-container">
-            <h1 class="text-6xl mb-4">🏆</h1>
-            <h2 class="text-3xl font-bold text-indigo-600 mb-2">Game Matematika</h2>
-            <p class="text-gray-400 mb-6">Kalahkan Rekormu!</p>
+            <h1 class="text-4xl mb-2">🚀</h1>
+            <h2 class="text-2xl font-bold text-indigo-600 mb-6">MathCilik Global</h2>
             
-            <div id="highscore-area" class="bg-yellow-50 p-4 rounded-2xl mb-6 border-2 border-yellow-200">
-                <p class="text-sm text-yellow-600 font-bold uppercase">Skor Tertinggi</p>
-                <p id="top-score-val" class="text-2xl font-black text-yellow-700">Loading...</p>
-            </div>
-
-            <input id="nama" type="text" placeholder="Nama kamu.." class="w-full p-4 text-xl border-4 border-indigo-100 rounded-3xl mb-6 text-center outline-none focus:border-indigo-400">
-            <button onclick="mulaiGame()" class="w-full bg-indigo-500 text-white text-2xl font-bold py-5 rounded-3xl shadow-[0_10px_0_rgb(67,56,202)] active:shadow-none active:translate-y-2 transition-all">
-                MAIN SEKARANG 
+            <input id="nama" type="text" placeholder="Nama Jagoan..." class="w-full p-4 text-lg border-4 border-indigo-50 rounded-2xl mb-4 text-center outline-none focus:border-indigo-400">
+            
+            <button onclick="mulaiGame()" class="w-full bg-indigo-500 text-white text-xl font-bold py-4 rounded-2xl shadow-[0_6px_0_rgb(67,56,202)] active:shadow-none active:translate-y-1 transition-all">
+                MAIN SEKARANG!
             </button>
+
+            <div id="leaderboard-section" class="mt-8">
+                <p class="text-indigo-600 font-bold mb-3">🏆 5 JAGOAN TERATAS</p>
+                <div id="list-juara" class="text-left text-sm space-y-2">
+                    <p class="text-center text-gray-400 italic">Memuat data...</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- KONFIGURASI API ---
-        const API_URL = "https://mathe.sekawanation.workers.dev"; 
-
+        const API_URL = "https://mathe.sekawanation.workers.dev"; // Pastikan ini URL Worker kamu
         let skor = 0;
-        let level = 1;
-        let soalSekarang = {};
         let namaPlayer = "";
 
-        const sfxCring = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3');
-        const sfxTetot = new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3');
-        const sfxLevelUp = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3');
-
-        // Ambil Highscore dari Database saat web dibuka
-        window.onload = async () => {
+        // Fungsi Ambil Leaderboard
+        async function loadLeaderboard() {
             try {
                 const res = await fetch(`${API_URL}/leaderboard`);
                 const data = await res.json();
-                if(data.length > 0) {
-                    document.getElementById('top-score-val').innerText = `${data[0].nama}: ${data[0].skor}`;
+                const listContainer = document.getElementById('list-juara');
+                
+                if (data.length > 0) {
+                    listContainer.innerHTML = data.map((p, i) => `
+                        <div class="flex justify-between bg-indigo-50 p-2 rounded-lg">
+                            <span>${i+1}. <b>${p.nama}</b></span>
+                            <span class="font-bold text-indigo-600">${p.skor} pts</span>
+                        </div>
+                    `).join('');
                 } else {
-                    document.getElementById('top-score-val').innerText = "0";
+                    listContainer.innerHTML = `<p class="text-center text-gray-400">Belum ada data. Jadilah yang pertama!</p>`;
                 }
             } catch (e) {
-                document.getElementById('top-score-val').innerText = "Offline";
+                document.getElementById('list-juara').innerHTML = `<p class="text-red-400 text-center">Gagal koneksi server</p>`;
             }
-        };
+        }
+
+        // Panggil Leaderboard saat web dibuka
+        window.onload = loadLeaderboard;
 
         function mulaiGame() {
             namaPlayer = document.getElementById('nama').value;
-            if(!namaPlayer) return Swal.fire('Eitss!', 'Namamu siapa Jagoan?', 'warning');
-            tampilkanSoal();
-        }
+            if(!namaPlayer) return Swal.fire('Eitss!', 'Namamu siapa?', 'warning');
+            
+            // Logika game sederhana untuk tes
+            let a = Math.floor(Math.random() * 10) + 1;
+            let b = Math.floor(Math.random() * 10) + 1;
+            let hasil = a + b;
 
-        function getLevelName() {
-            if (level >= 10) return "DIAMOND 💎";
-            if (level >= 7) return "PLATINUM 👑";
-            if (level >= 4) return "GOLD 🥇";
-            return "BRONZE 🥉";
-        }
-
-        function tampilkanSoal() {
-            const range = 5 + (level * 5);
-            const a = Math.floor(Math.random() * range) + 1;
-            const b = Math.floor(Math.random() * range) + 1;
-            const jawabanBenar = a + b;
-            soalSekarang = { a, b, benar: jawabanBenar };
-
-            let pilihan = [jawabanBenar, jawabanBenar + Math.floor(Math.random()*5)+1, jawabanBenar - Math.floor(Math.random()*3)-1, jawabanBenar + 10];
-            pilihan = Array.from(new Set(pilihan)).sort(() => Math.random() - 0.5);
-
-            document.getElementById('game-container').innerHTML = `
-                <div class="flex justify-between items-center mb-4 text-sm font-bold">
-                    <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">Level ${level}</span>
-                    <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full">⭐ ${skor}</span>
-                </div>
-                <div class="lvl-badge text-xs font-black text-purple-500 mb-2 uppercase tracking-widest">Rank: ${getLevelName()}</div>
-                <div class="bg-indigo-50 p-8 rounded-[40px] border-4 border-indigo-100 mb-6">
-                    <p class="text-6xl font-black text-indigo-600">${a} + ${b}</p>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    ${pilihan.map(p => `
-                        <button onclick="cekJawaban(${p})" class="bg-white border-4 border-indigo-50 hover:border-indigo-400 p-5 rounded-3xl text-3xl font-bold text-indigo-600 shadow-sm active:scale-90 transition-all">
-                            ${p}
-                        </button>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        async function cekJawaban(jawaban) {
-            if(jawaban === soalSekarang.benar) {
-                skor += 10;
-                sfxCring.play();
-                if(skor % 50 === 0) {
-                    level++;
-                    sfxLevelUp.play();
-                    Swal.fire({ title: 'LEVEL UP! 🔥', text: `Selamat ${namaPlayer}, naik ke Level ${level}!`, icon: 'success' }).then(() => tampilkanSoal());
+            Swal.fire({
+                title: `${a} + ${b} = ?`,
+                input: 'number',
+                confirmButtonText: 'JAWAB',
+                allowOutsideClick: false
+            }).then(async (result) => {
+                if (parseInt(result.value) === hasil) {
+                    skor = 100; // Contoh skor tetap untuk tes
+                    Swal.fire('Benar!', `Skormu: ${skor}`, 'success').then(async () => {
+                        await simpanSkor();
+                        location.reload();
+                    });
                 } else {
-                    tampilkanSoal();
+                    Swal.fire('Salah!', 'Coba lagi ya!', 'error').then(() => location.reload());
                 }
-            } else {
-                sfxTetot.play();
-                // SIMPAN KE CLOUD SEBELUM REFRESH
-                await simpanKeCloud(namaPlayer, skor);
-                
-                Swal.fire({
-                    title: 'GAME OVER! 💥',
-                    text: `Skor ${namaPlayer}: ${skor}. Skor sudah disimpan di Leaderboard!`,
-                    icon: 'error',
-                    confirmButtonText: 'MAIN LAGI'
-                }).then(() => location.reload());
-            }
+            });
         }
 
-        async function simpanKeCloud(nama, skor) {
+        async function simpanSkor() {
             try {
                 await fetch(`${API_URL}/submit-score`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nama, skor })
+                    body: JSON.stringify({ nama: namaPlayer, skor: skor })
                 });
             } catch (e) {
-                console.error("Gagal simpan skor ke awan");
+                console.error("Gagal simpan:", e);
             }
         }
     </script>
